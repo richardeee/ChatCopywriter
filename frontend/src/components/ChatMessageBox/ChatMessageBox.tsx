@@ -67,12 +67,13 @@ const ChatMessageBox = ({
   const messageText = isAssistant ? (
     <Typography
       component="div"
+      sx={{fontSize: 15}}
       dangerouslySetInnerHTML={{
         __html: text,
       }}
     />
   ) : (
-    <Typography color="textPrimary" variant="body1">{text}</Typography>
+    <Typography sx={{fontSize: 15}} color="textPrimary">{text}</Typography>
   );
 
   return (

@@ -12,41 +12,58 @@ import "./index.css";
 
 const rootElement = document.getElementById("root");
 const root = ReactDOM.createRoot(rootElement!);
+export const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 
 const Main = () => {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
+  
 
-  const theme = createTheme({
-    components: {
-      MuiPopover: {
-        defaultProps: {
-          container: rootElement,
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        components: {
+          MuiPopover: {
+            defaultProps: {
+              container: rootElement,
+            },
+          },
+          MuiPopper: {
+            defaultProps: {
+              container: rootElement,
+            },
+          },
         },
-      },
-      MuiPopper: {
-        defaultProps: {
-          container: rootElement,
+        palette: {
+          mode: mode,
+          primary: {
+            main: "#673ab7",
+          },
+          secondary: {
+            main: "#f50057",
+          },
         },
+      }),
+    [mode],
+  );
+
+  const colorMode = React.useMemo(
+    () => ({
+      toggleColorMode: () => {
+        setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
       },
-    },
-    palette: {
-      mode: prefersDarkMode ? "dark" : "light",
-      primary: {
-        main: "#673ab7",
-      },
-      secondary: {
-        main: "#f50057",
-      },
-    },
-  });
+    }),
+    [],
+  );
 
   return (
     <React.StrictMode>
       <StyledEngineProvider injectFirst>
+      <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <App />
         </ThemeProvider>
+        </ColorModeContext.Provider>
       </StyledEngineProvider>
     </React.StrictMode>
   );

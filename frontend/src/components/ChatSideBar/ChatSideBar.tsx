@@ -35,7 +35,7 @@ const ChatSideBar = () => {
         role: "Copilot",
         text:
           question.text +
-          "的答案是<h1>Title</h1><h2>Sub title 1</h2><p>" +
+          "的答案是<html><body><h1>Title</h1><h2>Sub title 1</h2><p></body></html>" +
           question.text +
           "</p>",
         time: new Date().toLocaleString(),
@@ -69,14 +69,13 @@ const ChatSideBar = () => {
   };
 
   return (
-    <Paper elevation={2} className="flex flex-col h-[calc(100vh-74px)]">
-      <Box className="h-10 flex flex-row-reverse" sx={{backgroundColor: theme.palette.background}}>
+    <Box sx={{borderLeft: '1px solid', borderColor: theme.palette.primary}} className="flex flex-col h-[calc(100vh-75px)]">
+      {/* <Box className="h-10 flex flex-row-reverse" sx={{backgroundColor: theme.palette.background}}>
         <IconButton>
           <CleaningServices sx={{fontSize:15}}/>
-          <Typography sx={{fontSize:15}} variant="body1">清空</Typography>
         </IconButton>
-      </Box>
-      <Box className="flex flex-grow flex-col hover:overflow-y-auto overflow-hidden">
+      </Box> */}
+      <Box className="flex flex-grow flex-col hover:overflow-y-auto overflow-hidden p-2">
       
         {answers.map((answer, index) => (
           <>
@@ -106,7 +105,7 @@ const ChatSideBar = () => {
           onSend={(question) => handleSendMessage(question)}
         />
       </Box>
-    </Paper>
+    </Box>
   );
 };
 

@@ -19,7 +19,8 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import { Outlet } from "react-router-dom";
 import { LightMode, DarkMode } from "@mui/icons-material";
-const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
+import { useTheme } from "@mui/material/styles";
+import { ColorModeContext } from "../../main.tsx";
 
 const drawerWidth = 240;
 
@@ -80,27 +81,9 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 export default function PersistentDrawerLeft() {
-  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
-  const colorMode = React.useMemo(
-    () => ({
-      toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-      },
-    }),
-    [],
-  );
-
-  const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-        },
-      }),
-    [mode],
-  );
   const [open, setOpen] = React.useState(false);
-  
+  const colorMode = React.useContext(ColorModeContext);
+  const theme = useTheme()
   
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -111,8 +94,7 @@ export default function PersistentDrawerLeft() {
   };
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
+    
     <Box sx={{ display: "flex" }}>
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -192,7 +174,5 @@ export default function PersistentDrawerLeft() {
         <Outlet />
       </Main>
     </Box>
-    </ThemeProvider>
-    </ColorModeContext.Provider>
   );
 }
