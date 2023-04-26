@@ -10,16 +10,19 @@ import requests
 
 class Dalle2Helper(BaseModel):
     dalle2_api_version = '2022-08-03-preview'
+
+    dalle_api_key: str
+    dalle_api_url: str
     
-    def __init__(self, api_key, api_base):
-        self.api_key = api_key
-        self.api_base = api_base
-        self.api_version = self.dalle2_api_version
-    
+    class Config:
+        """Configuration for this pydantic object."""
+
+        extra = Extra.forbid
+
     def run(self, user_prompt: str) -> str:
         """Run user prompt through Dalle and return image url."""
-        url = "{api_base}dalle/text-to-image?api-version={api_version}".format(api_base=self.api_base, api_version=self.api_version)
-        headers= { "api-key": self.api_key, "Content-Type": "application/json" }
+        url = "{api_base}dalle/text-to-image?api-version={api_version}".format(api_base=self.dalle_api_url, api_version='2022-08-03-preview')
+        headers= { "api-key": self.dalle_api_key, "Content-Type": "application/json" }
         body = {
             "caption": user_prompt,
             "resolution": "{height}x{width}".format(height=512, width=512),
@@ -36,16 +39,13 @@ class Dalle2Helper(BaseModel):
         image_url = response.json()['result']['contentUrl']
         return image_url
 
-    class Config:
-        """Configuration for this pydantic object."""
-
-        extra = Extra.forbid
+    
 
     @root_validator(pre=True)
     def validate_environment(cls, values: Dict) -> Dict:
         """Validate that api key and endpoint exists in environment."""
         dalle_api_key = get_from_dict_or_env(
-            values, "DALLE_API_KEY", "dalle_api_key"
+            values, "dalle_api_key","DALLE_API_KEY"
         )
         values["dalle_api_key"] = dalle_api_key
 

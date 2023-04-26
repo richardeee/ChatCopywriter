@@ -37,7 +37,7 @@ DALLE_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY_2")
 DALLE_API_BASE = os.environ.get("AZURE_OPENAI_API_BASE_2")
 
 search = BingSearchAPIWrapper(bing_search_url=str(BING_SEARCH_URL), bing_subscription_key=str(BING_SUBSCRIPTION_KEY))
-dalle = Dalle2Helper()
+dalle = Dalle2Helper(dalle_api_key=str(DALLE_API_KEY), dalle_api_url=str(DALLE_API_BASE))
 
 class CopywriterAgent(ConversationalChatAgent):
 

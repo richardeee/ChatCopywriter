@@ -28,7 +28,7 @@ load_dotenv()
 
 AZURE_OPENAI_API_KEY_1 = os.environ.get("AZURE_OPENAI_API_KEY_1")
 AZURE_OPENAI_API_BASE_1 = os.environ.get("AZURE_OPENAI_API_BASE_1")
-AZURE_OPENAI_API_VERSION = os.environ.get("2OPENAI_API_VERSION")
+AZURE_OPENAI_API_VERSION = os.environ.get("OPENAI_API_VERSION")
 AZURE_CHATGPT_DEPLOYMENT = os.environ.get("AZURE_CHATGPT_DEPLOYMENT")
 
 openai.api_type = "azure"
@@ -42,8 +42,14 @@ BING_SEARCH_URL =  os.environ.get("BING_SEARCH_URL")
 DALLE_API_KEY = os.environ.get("AZURE_OPENAI_API_KEY_2")
 DALLE_API_BASE = os.environ.get("AZURE_OPENAI_API_BASE_2")
 
+print(DALLE_API_KEY)
+print(DALLE_API_BASE)
+
+os.environ["dalle_api_key"] = str(DALLE_API_KEY)
+os.environ["dalle_api_url"] = str(DALLE_API_BASE)
+
 search = BingSearchAPIWrapper(bing_search_url=str(BING_SEARCH_URL), bing_subscription_key=str(BING_SUBSCRIPTION_KEY))
-dalle = Dalle2Helper(DALLE_API_KEY, DALLE_API_BASE)
+dalle = Dalle2Helper(dalle_api_key=str(DALLE_API_KEY),dalle_api_url=str(DALLE_API_BASE))
 
 app = Flask(__name__)
 
@@ -71,7 +77,7 @@ def generate():
     llm = AzureChatOpenAI(
             openai_api_base=AZURE_OPENAI_API_BASE_1,
             openai_api_version=AZURE_OPENAI_API_VERSION,
-            deployment_name='gpt-4',
+            deployment_name='gpt-4-32k',
             openai_api_key=AZURE_OPENAI_API_KEY_1,
             openai_api_type = "azure",
         ) # type: ignore
@@ -83,7 +89,7 @@ def generate():
                 description="useful for when you need to answer questions about current events or the current state of the world. the input to this should be a single search term."
             ),
             Tool(
-                name = "Dalle",
+                name = "Generate Image",
                 func=dalle.run,
                 description="useful for when you need to generate image. the input to this should be a natural language describing the image."
             )
@@ -119,13 +125,17 @@ def generate():
     )
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     output_parser = CopywriterOutputParser()
-    agent = CopywriterAgent(
+    agent = LLMSingleActionAgent(
         llm_chain=llm_chain,
-        allowed_tools=tool_names,
+        # allowed_tools=tool_names,
+        stop=["\nObservation:"],
         output_parser=output_parser
     )
-    agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
-    agent_executor.run("Please help me write a blog about labor's day. Please generate image between each paragraph. Please output in html format.")
+    # agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+    # result = agent_executor.run("Please help me write a blog about labor's day. Please generate image between each paragraph. Please output in html format.")
+    agent_chain = initialize_agent(tools, llm, agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION, verbose=True, memory=memory)
+    result = agent_chain.run("Please help me write a blog about labor's day. Please generate image between each paragraph. Please output in html format.")
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run()
